@@ -133,6 +133,7 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 	BLE_ON
 	LED_OFF
+
 	HAL_UART_Transmit(&hlpuart1, (uint8_t*) "\r\nSTART\r\n", 9, 10);
 
 	/*##-2- Start the transmission process #####################################*/
@@ -192,7 +193,7 @@ int main(void) {
 
 
 
-	HAL_Delay(500);
+	HAL_Delay(100);
 
 	if (posFimString > 2) {
 		char tranf[posFimString];
@@ -228,7 +229,7 @@ int main(void) {
 
 		/* Reset transmission flag */
 		UartReady = RESET;
-		HAL_Delay(500);
+		HAL_Delay(100);
 		for (int var = 0; var < RXBUFFERSIZE; var++) {
 			if (aRxBuffer[var] != 0) {
 				word[posFimString] = aRxBuffer[var];
