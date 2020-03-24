@@ -1,6 +1,6 @@
-main.c:280:6:SystemClock_Config	120	static
+main.c:286:6:SystemClock_Config	120	static
 main.c:101:5:main	80	dynamic
-main.c:769:6:HAL_UART_TxCpltCallback	0	static
-main.c:783:6:HAL_UART_RxCpltCallback	0	static
-main.c:796:6:Error_Handler	0	static
-main.c:811:6:assert_failed	0	static
+main.c:775:6:HAL_UART_TxCpltCallback	0	static
+main.c:789:6:HAL_UART_RxCpltCallback	0	static
+main.c:802:6:Error_Handler	0	static
+main.c:817:6:assert_failed	0	static

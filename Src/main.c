@@ -80,7 +80,7 @@ static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] = "\n\r ****BLE TEST****\n\r";
+uint8_t aTxBuffer[] = "\n\r ****GPRS TEST****\n\r";
 
 /* Buffer used for reception */
 char aRxBuffer[RXBUFFERSIZE];
@@ -131,9 +131,17 @@ int main(void) {
 	MX_USART5_UART_Init();
 	MX_RTC_Init();
 	/* USER CODE BEGIN 2 */
-	BLE_ON
-	LED_OFF
 
+	LED_OFF
+	HAL_UART_Transmit(&hlpuart1, (uint8_t*) "\r\nENABLE\r\n", 10, 10);
+	HAL_GPIO_WritePin(EN_GPRS_GPIO_Port, EN_GPRS_Pin, 1);
+	HAL_Delay(1000);
+	HAL_UART_Transmit(&hlpuart1, (uint8_t*) "\r\nRESET\r\n", 9, 10);
+	HAL_GPIO_WritePin(GPRS_RST_GPIO_Port, GPRS_RST_Pin, 1);
+	HAL_Delay(3000);
+	HAL_UART_Transmit(&hlpuart1, (uint8_t*) "\r\nPOWER\r\n", 9, 10);
+	HAL_GPIO_WritePin(GPRS_PWR_ON_GPIO_Port, GPRS_PWR_ON_Pin, 1);
+	HAL_Delay(10000);
 	HAL_UART_Transmit(&hlpuart1, (uint8_t*) "\r\nSTART\r\n", 9, 10);
 
 	/*##-2- Start the transmission process #####################################*/
@@ -171,7 +179,7 @@ int main(void) {
 		HAL_UART_Receive_DMA(&hlpuart1, (uint8_t *) aRxBuffer, RXBUFFERSIZE);
 		for (int var = 0; var < RXBUFFERSIZE; var++) {
 			word[var] = 0;
-			if (aRxBuffer[var] == 13) {
+			if (aRxBuffer[var] == 10) {
 				UartReady = SET;
 				break;
 			}
@@ -191,8 +199,6 @@ int main(void) {
 		}
 	}
 
-
-
 	HAL_Delay(100);
 
 	if (posFimString > 2) {
@@ -200,7 +206,7 @@ int main(void) {
 		strcpy(tranf, word);
 
 		/*##-5- Send the received Buffer ###########################################*/
-		if (HAL_UART_Transmit_DMA(&huart4, (uint8_t *) &tranf, posFimString)
+		if (HAL_UART_Transmit_IT(&huart5, (uint8_t *) &tranf, posFimString)
 				!= HAL_OK) {
 			/* Transfer error in transmission process */
 			goto init;
@@ -210,7 +216,7 @@ int main(void) {
 		UartReady = RESET;
 
 		posFimString = 0;
-		if (HAL_UART_Receive_DMA(&huart4, (uint8_t *) aRxBuffer, bytesToReceive)
+		if (HAL_UART_Receive_IT(&huart5, (uint8_t *) aRxBuffer, bytesToReceive)
 				!= HAL_OK) {
 			/* Transfer error in reception process */
 
@@ -437,7 +443,7 @@ static void MX_LPUART1_UART_Init(void) {
 
 	/* USER CODE END LPUART1_Init 1 */
 	hlpuart1.Instance = LPUART1;
-	hlpuart1.Init.BaudRate = 115200;
+	hlpuart1.Init.BaudRate = 9600;
 	hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
 	hlpuart1.Init.StopBits = UART_STOPBITS_1;
 	hlpuart1.Init.Parity = UART_PARITY_NONE;
