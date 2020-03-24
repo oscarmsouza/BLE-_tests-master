@@ -87,7 +87,7 @@ uint8_t aTxBuffer[] =
 char aRxBuffer[RXBUFFERSIZE];
 uint8_t word[RXBUFFERSIZE];
 uint32_t bytesToReceive = sizeof(aRxBuffer), posFimString;
-uint8_t word[RXBUFFERSIZE];
+uint8_t word[];
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -154,9 +154,18 @@ int main(void)
 	/*##-3- Put UART peripheral in reception process ###########################*/
 	/* Any data received will be stored in "RxBuffer" buffer : the number max of
 	 data received is 10 */
+
+
+
+
+	/*********************************************************************************
+
+
+	*********************************************************************************/
+
+
 	init:
-	memset(aRxBuffer, 0, RXBUFFERSIZE);
-	memset(word, 0, RXBUFFERSIZE);
+
 	posFimString = 0;
 	if (HAL_UART_Receive_DMA(&hlpuart1, (uint8_t *) aRxBuffer, bytesToReceive)
 			!= HAL_OK) {
@@ -166,7 +175,8 @@ int main(void)
 	/*##-5- Wait for the end of the transfer ###################################*/
 	while (UartReady != SET) {
 		for (int var = 0; var < RXBUFFERSIZE; var++) {
-			if(aRxBuffer[var] == 10){
+			word[var] = 0;
+			if(aRxBuffer[var] == 13){
 
 				UartReady = SET;
 				break;
@@ -183,24 +193,79 @@ int main(void)
 				if(aRxBuffer[var] !=0){
 					word[posFimString] = aRxBuffer[var];
 					posFimString++;
+					aRxBuffer[var] = 0;
 				}
 	}
 
 
 	/*##-5- Send the received Buffer ###########################################*/
-	if (HAL_UART_Transmit_DMA(&huart4, (uint8_t *) word, posFimString)
-			!= HAL_OK) {
+	if (HAL_UART_Transmit_DMA(&huart4, (uint8_t *) &word, TXBUFFERSIZE)
+			!= HAL_OK || posFimString==0) {
 		/* Transfer error in transmission process */
-
+		goto init;
 	}
-/*	##-5- Wait for the end of the transfer ###################################
 	while (UartReady != SET) {
-
 	}
+	UartReady = RESET;
 
-	 Reset transmission flag
-	UartReady = RESET;*/
+
+
+
+
+
+
+
+		posFimString = 0;
+		if (HAL_UART_Receive_DMA(&huart4, (uint8_t *) aRxBuffer, bytesToReceive)
+				!= HAL_OK) {
+			/* Transfer error in reception process */
+
+		}
+		/*##-5- Wait for the end of the transfer ###################################*/
+		while (UartReady != SET) {
+			for (int var = 0; var < RXBUFFERSIZE; var++) {
+				word[var] = 0;
+				if(aRxBuffer[var] == 10){
+					UartReady = SET;
+					break;
+				}
+			}
+			UartReady = SET;
+		}
+
+		/* Reset transmission flag */
+		UartReady = RESET;
+
+		for (int var = 0; var < RXBUFFERSIZE; var++) {
+					if(aRxBuffer[var] !=0){
+						word[posFimString] = aRxBuffer[var];
+						posFimString++;
+						aRxBuffer[var] = 0;
+					}
+		}
+
+
+		/*##-5- Send the received Buffer ###########################################*/
+		if (HAL_UART_Transmit_DMA(&hlpuart1, (uint8_t *) word, TXBUFFERSIZE)
+				!= HAL_OK || posFimString==0) {
+						/* Transfer error in transmission process */
+						goto init;
+
+		}
+		while (UartReady != SET) {
+		}
+		UartReady = RESET;
+
+
+	/*********************************************************************************
+
+
+	*********************************************************************************/
 	goto init;
+	/*********************************************************************************
+
+
+	*********************************************************************************/
   /* USER CODE END 2 */
  
  
@@ -392,7 +457,7 @@ static void MX_LPUART1_UART_Init(void)
 
   /* USER CODE END LPUART1_Init 1 */
   hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 9600;
+  hlpuart1.Init.BaudRate = 115200;
   hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
   hlpuart1.Init.StopBits = UART_STOPBITS_1;
   hlpuart1.Init.Parity = UART_PARITY_NONE;
